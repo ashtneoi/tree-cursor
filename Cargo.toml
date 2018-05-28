@@ -1,0 +1,6 @@
+[package]
+name = "tree-cursor"
+version = "0.0.1"
+authors = ["ashtneoi <ashtneoi@gmail.com>"]
+
+[dependencies]
