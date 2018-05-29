@@ -7,19 +7,12 @@ pub struct TreeCursor<'n, N: 'n> {
     stack: Vec<(*const N, usize)>,
 }
 
-impl<'n, N: 'n + Down> TreeCursor<'n, N> {
+impl<'n, N: 'n> TreeCursor<'n, N> {
     pub fn new(root: &'n N) -> Self {
         Self {
             root: PhantomData,
             stack: vec![(root as *const N, 0)],
         }
-    }
-
-    fn down_ptr(&mut self) -> Option<*const N> {
-        let idx = self.stack.last().unwrap().1;
-        let new_ptr = self.get().down(idx)? as *const N;
-        self.stack.last_mut().unwrap().1 += 1;
-        Some(new_ptr)
     }
 
     fn down_map_ptr<F>(&mut self, f: F) -> Option<*const N>
@@ -55,14 +48,6 @@ impl<'n, N: 'n + Down> TreeCursor<'n, N> {
         self.stack.last_mut().unwrap().1 = 0;
     }
 
-    pub fn down(&mut self) -> bool {
-        let maybe_new_ptr = self.down_ptr();
-        if let &Some(new_ptr) = &maybe_new_ptr {
-            self.stack.push((new_ptr, 0));
-        }
-        maybe_new_ptr.is_some()
-    }
-
     pub fn up(&mut self) -> bool {
         if self.stack.len() == 1 {
             self.stack[0].1 = 0;
@@ -76,6 +61,23 @@ impl<'n, N: 'n + Down> TreeCursor<'n, N> {
     pub fn get(&self) -> &N {
         let here: *const N = self.stack.last().unwrap().0;
         unsafe { here.as_ref().unwrap() }
+    }
+}
+
+impl<'n, N: 'n + Down> TreeCursor<'n, N> {
+    fn down_ptr(&mut self) -> Option<*const N> {
+        let idx = self.stack.last().unwrap().1;
+        let new_ptr = self.get().down(idx)? as *const N;
+        self.stack.last_mut().unwrap().1 += 1;
+        Some(new_ptr)
+    }
+
+    pub fn down(&mut self) -> bool {
+        let maybe_new_ptr = self.down_ptr();
+        if let &Some(new_ptr) = &maybe_new_ptr {
+            self.stack.push((new_ptr, 0));
+        }
+        maybe_new_ptr.is_some()
     }
 
     pub fn down_new(&mut self) -> Option<Self> {
@@ -97,13 +99,6 @@ impl<'n, N: 'n + DownMut> TreeCursorMut<'n, N> {
             root: PhantomData,
             stack: vec![(root_ptr, 0)],
         }
-    }
-
-    fn down_ptr(&mut self) -> Option<*mut N> {
-        let idx = self.stack.last().unwrap().1;
-        let new_ptr = self.get_mut().down_mut(idx)? as *mut N;
-        self.stack.last_mut().unwrap().1 += 1;
-        Some(new_ptr)
     }
 
     fn down_map_ptr<F>(&mut self, f: F) -> Option<*mut N>
@@ -139,14 +134,6 @@ impl<'n, N: 'n + DownMut> TreeCursorMut<'n, N> {
         self.stack.last_mut().unwrap().1 = 0;
     }
 
-    pub fn down(&mut self) -> bool {
-        let maybe_new_ptr = self.down_ptr();
-        if let &Some(new_ptr) = &maybe_new_ptr {
-            self.stack.push((new_ptr, 0));
-        }
-        maybe_new_ptr.is_some()
-    }
-
     pub fn up(&mut self) -> bool {
         if self.stack.len() == 1 {
             self.stack[0].1 = 0;
@@ -162,13 +149,30 @@ impl<'n, N: 'n + DownMut> TreeCursorMut<'n, N> {
         (unsafe { here.as_ref() }).unwrap()
     }
 
-    pub fn down_new(&mut self) -> Option<Self> {
-        let new_ptr = self.down_ptr()?;
-        Some(Self::new(unsafe { new_ptr.as_mut().unwrap() }))
-    }
-
     pub fn get_mut(&mut self) -> &mut N {
         let here = self.stack.last().unwrap().0;
         (unsafe { here.as_mut() }).unwrap()
+    }
+}
+
+impl<'n, N: 'n + DownMut> TreeCursorMut<'n, N> {
+    fn down_ptr(&mut self) -> Option<*mut N> {
+        let idx = self.stack.last().unwrap().1;
+        let new_ptr = self.get_mut().down_mut(idx)? as *mut N;
+        self.stack.last_mut().unwrap().1 += 1;
+        Some(new_ptr)
+    }
+
+    pub fn down(&mut self) -> bool {
+        let maybe_new_ptr = self.down_ptr();
+        if let &Some(new_ptr) = &maybe_new_ptr {
+            self.stack.push((new_ptr, 0));
+        }
+        maybe_new_ptr.is_some()
+    }
+
+    pub fn down_new(&mut self) -> Option<Self> {
+        let new_ptr = self.down_ptr()?;
+        Some(Self::new(unsafe { new_ptr.as_mut().unwrap() }))
     }
 }
