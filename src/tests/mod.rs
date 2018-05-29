@@ -212,3 +212,31 @@ fn scoped_down() {
     assert!(!c.up());
     assert!(c.down());
 }
+
+#[test]
+fn iter_down() {
+    let t = xx(vec![
+        xx(vec![
+            x(),
+        ]),
+        xx(vec![
+            x(),
+            x(),
+        ]),
+        xx(vec![
+            x(),
+            x(),
+            x(),
+        ]),
+    ]);
+
+    let mut c = TreeCursor::new(&t);
+
+    let mut leaf_count = 0;
+    while let Some(mut c) = c.down_new() {
+        while let Some(_) = c.down_new() {
+            leaf_count += 1;
+        }
+    }
+    assert_eq!(leaf_count, 6);
+}
