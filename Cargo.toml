@@ -3,5 +3,12 @@ name = "tree-cursor"
 version = "0.0.1"
 authors = ["ashtneoi <ashtneoi@gmail.com>"]
 license = "MIT"
+repository = "https://github.com/ashtneoi/tree-cursor"
+keywords = ["tree", "cursor"]
+categories = ["data-structures"]
+description = """
+A simple, non-intrusive tree cursor that supports node mutation without
+Cell/RefCell.
+"""
 
 [dependencies]
