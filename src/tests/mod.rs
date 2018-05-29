@@ -120,48 +120,91 @@ fn get() {
         ]),
         x(),
     ]);
+    let mut mt = t.clone();
 
     let mut c = TreeCursor::new(&t);
+    let mut cm = TreeCursorMut::new(&mut mt);
     assert!(ptr::eq(c.get(), &t));
+    assert!(ptr::eq(cm.get() as *const X, cm.get_mut() as *const X));
+    assert_eq!(cm.get().v.len(), 2);
 
     assert!(c.down());
+    assert!(cm.down());
     assert!(ptr::eq(c.get(), &t.v[0]));
+    assert!(ptr::eq(cm.get() as *const X, cm.get_mut() as *const X));
+    assert_eq!(cm.get().v.len(), 2);
 
     assert!(c.down());
+    assert!(cm.down());
     assert!(ptr::eq(c.get(), &t.v[0].v[0]));
+    assert!(ptr::eq(cm.get() as *const X, cm.get_mut() as *const X));
+    assert_eq!(cm.get().v.len(), 0);
 
     assert!(!c.down());
+    assert!(!cm.down());
     assert!(ptr::eq(c.get(), &t.v[0].v[0]));
+    assert!(ptr::eq(cm.get() as *const X, cm.get_mut() as *const X));
+    assert_eq!(cm.get().v.len(), 0);
 
     assert!(c.up());
+    assert!(cm.up());
     assert!(ptr::eq(c.get(), &t.v[0]));
+    assert!(ptr::eq(cm.get() as *const X, cm.get_mut() as *const X));
+    assert_eq!(cm.get().v.len(), 2);
 
     assert!(c.down());
+    assert!(cm.down());
     assert!(ptr::eq(c.get(), &t.v[0].v[1]));
+    assert!(ptr::eq(cm.get() as *const X, cm.get_mut() as *const X));
+    assert_eq!(cm.get().v.len(), 0);
 
     assert!(!c.down());
+    assert!(!cm.down());
     assert!(ptr::eq(c.get(), &t.v[0].v[1]));
+    assert!(ptr::eq(cm.get() as *const X, cm.get_mut() as *const X));
+    assert_eq!(cm.get().v.len(), 0);
 
     assert!(c.up());
+    assert!(cm.up());
     assert!(ptr::eq(c.get(), &t.v[0]));
+    assert!(ptr::eq(cm.get() as *const X, cm.get_mut() as *const X));
+    assert_eq!(cm.get().v.len(), 2);
 
     assert!(!c.down());
+    assert!(!cm.down());
     assert!(ptr::eq(c.get(), &t.v[0]));
+    assert!(ptr::eq(cm.get() as *const X, cm.get_mut() as *const X));
+    assert_eq!(cm.get().v.len(), 2);
 
     assert!(c.up());
+    assert!(cm.up());
     assert!(ptr::eq(c.get(), &t));
+    assert!(ptr::eq(cm.get() as *const X, cm.get_mut() as *const X));
+    assert_eq!(cm.get().v.len(), 2);
 
     assert!(c.down());
+    assert!(cm.down());
     assert!(ptr::eq(c.get(), &t.v[1]));
+    assert!(ptr::eq(cm.get() as *const X, cm.get_mut() as *const X));
+    assert_eq!(cm.get().v.len(), 0);
 
     assert!(!c.down());
+    assert!(!cm.down());
     assert!(ptr::eq(c.get(), &t.v[1]));
+    assert!(ptr::eq(cm.get() as *const X, cm.get_mut() as *const X));
+    assert_eq!(cm.get().v.len(), 0);
 
     assert!(c.up());
+    assert!(cm.up());
     assert!(ptr::eq(c.get(), &t));
+    assert!(ptr::eq(cm.get() as *const X, cm.get_mut() as *const X));
+    assert_eq!(cm.get().v.len(), 2);
 
     assert!(!c.up());
+    assert!(!cm.up());
     assert!(ptr::eq(c.get(), &t));
+    assert!(ptr::eq(cm.get() as *const X, cm.get_mut() as *const X));
+    assert_eq!(cm.get().v.len(), 2);
 }
 
 #[test]
