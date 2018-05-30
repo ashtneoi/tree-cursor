@@ -17,17 +17,21 @@ impl<'n, N: 'n> TreeCursor<'n, N> {
 
     fn down_map_ptr<F>(&mut self, f: F) -> Option<*const N>
     where
-        F: Fn(&N, usize) -> Option<&'n N>,
+        F: Fn(&'n N, usize) -> Option<&'n N>,
     {
         let idx = self.stack.last().unwrap().1;
-        let new_ptr = f(self.get(), idx)? as *const N;
+        let here_ptr = self.get() as *const N;
+        let new_ptr = f(
+            unsafe { here_ptr.as_ref().unwrap() },
+            idx,
+        )? as *const N;
         self.stack.last_mut().unwrap().1 += 1;
         Some(new_ptr)
     }
 
     pub fn down_map<F>(&mut self, f: F) -> bool
     where
-        F: Fn(&N, usize) -> Option<&'n N>,
+        F: Fn(&'n N, usize) -> Option<&'n N>,
     {
         let maybe_new_ptr = self.down_map_ptr(f);
         if let &Some(new_ptr) = &maybe_new_ptr {
@@ -38,7 +42,7 @@ impl<'n, N: 'n> TreeCursor<'n, N> {
 
     pub fn down_map_new<F>(&mut self, f: F) -> Option<Self>
     where
-        F: Fn(&N, usize) -> Option<&'n N>,
+        F: Fn(&'n N, usize) -> Option<&'n N>,
     {
         let new_ptr = self.down_map_ptr(f)?;
         Some(Self::new(unsafe { new_ptr.as_ref().unwrap() }))
@@ -103,17 +107,21 @@ impl<'n, N: 'n> TreeCursorMut<'n, N> {
 
     fn down_map_ptr<F>(&mut self, f: F) -> Option<*mut N>
     where
-        F: Fn(&mut N, usize) -> Option<&'n mut N>,
+        F: Fn(&'n mut N, usize) -> Option<&'n mut N>,
     {
         let idx = self.stack.last().unwrap().1;
-        let new_ptr = f(self.get_mut(), idx)? as *mut N;
+        let here_ptr = self.get_mut() as *mut N;
+        let new_ptr = f(
+            unsafe { here_ptr.as_mut().unwrap() },
+            idx,
+        )? as *mut N;
         self.stack.last_mut().unwrap().1 += 1;
         Some(new_ptr)
     }
 
     pub fn down_map<F>(&mut self, f: F) -> bool
     where
-        F: Fn(&mut N, usize) -> Option<&'n mut N>,
+        F: Fn(&'n mut N, usize) -> Option<&'n mut N>,
     {
         let maybe_new_ptr = self.down_map_ptr(f);
         if let &Some(new_ptr) = &maybe_new_ptr {
@@ -124,7 +132,7 @@ impl<'n, N: 'n> TreeCursorMut<'n, N> {
 
     pub fn down_map_new<F>(&mut self, f: F) -> Option<Self>
     where
-        F: Fn(&mut N, usize) -> Option<&'n mut N>,
+        F: Fn(&'n mut N, usize) -> Option<&'n mut N>,
     {
         let new_ptr = self.down_map_ptr(f)?;
         Some(Self::new(unsafe { new_ptr.as_mut().unwrap() }))

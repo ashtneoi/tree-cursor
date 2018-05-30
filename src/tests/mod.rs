@@ -3,6 +3,8 @@ use prelude::*;
 use std::collections::HashMap;
 use std::ptr;
 
+mod hashmap_tree;
+
 #[derive(Clone)]
 struct X {
     v: Vec<X>,
