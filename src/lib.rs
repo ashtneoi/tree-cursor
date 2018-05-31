@@ -1,9 +1,7 @@
 pub mod cursor;
 
 pub mod prelude {
-    pub use super::{
-        Down, DownMut,
-    };
+    pub use super::{Down, DownMut};
 }
 
 #[cfg(test)]

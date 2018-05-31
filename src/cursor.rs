@@ -21,10 +21,8 @@ impl<'n, N: 'n> TreeCursor<'n, N> {
     {
         let idx = self.stack.last().unwrap().1;
         let here_ptr = self.get() as *const N;
-        let new_ptr = f(
-            unsafe { here_ptr.as_ref().unwrap() },
-            idx,
-        )? as *const N;
+        let new_ptr =
+            f(unsafe { here_ptr.as_ref().unwrap() }, idx)? as *const N;
         self.stack.last_mut().unwrap().1 += 1;
         Some(new_ptr)
     }
@@ -111,10 +109,7 @@ impl<'n, N: 'n> TreeCursorMut<'n, N> {
     {
         let idx = self.stack.last().unwrap().1;
         let here_ptr = self.get_mut() as *mut N;
-        let new_ptr = f(
-            unsafe { here_ptr.as_mut().unwrap() },
-            idx,
-        )? as *mut N;
+        let new_ptr = f(unsafe { here_ptr.as_mut().unwrap() }, idx)? as *mut N;
         self.stack.last_mut().unwrap().1 += 1;
         Some(new_ptr)
     }
