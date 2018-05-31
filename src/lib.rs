@@ -128,14 +128,14 @@
 //! # Mutability and node references
 //!
 //! [`TreeCursor`] is the immutable version of the tree cursor, meaning it
-//! holds only a shared reference to the tree, preventing you from modifying
-//! the tree until the cursor goes out of scope. If you need to modify the
-//! tree, use [`TreeCursorMut`] instead, which gives you access to a mutable
-//! reference to the current node.
+//! holds a shared reference to the tree, preventing you from modifying the
+//! tree until the cursor goes out of scope. If you need to modify the tree, use
+//! [`TreeCursorMut`] instead, which gives you access to a mutable reference to
+//! the current node.
 //!
 //! By design, neither version of the tree cursor allows you to reposition it
 //! while you hold a reference to the active node. If this were allowed (by
-//! extending the lifetime of the return value of [`get`] and [`get_mut`]), a
+//! changing the lifetime of the return value of [`get`] and [`get_mut`]), a
 //! node that held its children in a [`Cell`] or [`RefCell`] could drop a child
 //! that still had live references, violating memory safety.
 //!
