@@ -37,6 +37,8 @@
 //! struct Node(&'static str, Vec<Node>);
 //!
 //! // This trait impl is used by TreeCursor::down to determine the next child.
+//! // You can create a TreeCursor for something that doesn't implement Down;
+//! // you just won't be able to call TreeCursor::down.
 //! impl Down for Node {
 //!     fn down(&self, idx: usize) -> Option<&Self> {
 //!         // idx starts at 0 when we visit this node going downward and
