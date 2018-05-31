@@ -30,8 +30,9 @@ impl<'n, N: 'n> TreeCursor<'n, N> {
     }
 
     /// Passes `f` the active node and the current value of the "next child"
-    /// counter. If `f` returns a node, it's set as the active node and this
-    /// method returns true. Otherwise, this method returns false.
+    /// counter. If `f` returns a node, it's set as the active node, the old
+    /// active node's "next child" counter is incremented, and this method
+    /// returns true. Otherwise, this method returns false.
     pub fn down_map<F>(&mut self, f: F) -> bool
     where
         F: Fn(&'n N, usize) -> Option<&'n N>,
@@ -143,8 +144,9 @@ impl<'n, N: 'n> TreeCursorMut<'n, N> {
     }
 
     /// Passes `f` the active node and the current value of the "next child"
-    /// counter. If `f` returns a node, it's set as the active node and this
-    /// method returns true. Otherwise, this method returns false.
+    /// counter. If `f` returns a node, it's set as the active node, the old
+    /// active node's "next child" counter is incremented, and this method
+    /// returns true. Otherwise, this method returns false.
     pub fn down_map<F>(&mut self, f: F) -> bool
     where
         F: Fn(&'n mut N, usize) -> Option<&'n mut N>,

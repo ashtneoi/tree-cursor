@@ -36,9 +36,9 @@
 //!
 //! struct Node(&'static str, Vec<Node>);
 //!
-//! // This trait impl is used by TreeCursor::down to determine the next child.
-//! // You can create a TreeCursor for something that doesn't implement Down;
-//! // you just won't be able to call TreeCursor::down.
+//! // This trait impl is used by TreeCursor::down to determine the next child
+//! // to visit. You can create a TreeCursor for something that doesn't
+//! // implement Down; you just won't be able to call TreeCursor::down.
 //! impl Down for Node {
 //!     fn down(&self, idx: usize) -> Option<&Self> {
 //!         // idx starts at 0 when we visit this node going downward and
@@ -53,7 +53,7 @@
 //!     Node("bar", vec![]),
 //!     Node("zup", vec![]),
 //! ]);
-//! // foobar is a tree; its root, "foo", has two children named "bar" and
+//! // foobar is a tree; its root, "foo", has two children, named "bar" and
 //! // "zup".
 //!
 //! let mut cur = TreeCursor::new(&foobar);
@@ -131,7 +131,7 @@
 //! holds a shared reference to the tree, preventing you from modifying the
 //! tree until the cursor goes out of scope. If you need to modify the tree, use
 //! [`TreeCursorMut`] instead, which gives you access to a mutable reference to
-//! the current node.
+//! the active node.
 //!
 //! By design, neither version of the tree cursor allows you to reposition it
 //! while you hold a reference to the active node. If this were allowed (by
