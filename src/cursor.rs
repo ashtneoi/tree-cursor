@@ -76,6 +76,11 @@ impl<'n, N: 'n> TreeCursor<'n, N> {
         }
     }
 
+    /// Like [`up`], except it also returns a new `TreeCursor` whose root is
+    /// the old position. `self` is frozen until the new cursor goes out of
+    /// scope.
+    ///
+    /// [`up`]: TreeCursor::up
     pub fn get_new(&mut self) -> Option<Self> {
         if self.stack.len() == 1 {
             self.stack[0].1 = 0;
@@ -200,6 +205,11 @@ impl<'n, N: 'n> TreeCursorMut<'n, N> {
         }
     }
 
+    /// Like [`up`], except it also returns a new `TreeCursorMut` whose root is
+    /// the old position. `self` is frozen until the new cursor goes out of
+    /// scope.
+    ///
+    /// [`up`]: TreeCursorMut::up
     pub fn get_new(&mut self) -> Option<Self> {
         if self.stack.len() == 1 {
             self.stack[0].1 = 0;
