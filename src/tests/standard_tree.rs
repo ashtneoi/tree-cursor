@@ -282,6 +282,90 @@ fn scoped_down() {
 }
 
 #[test]
+fn scoped_here() {
+    let t = xx(vec![
+        xx(vec![
+            x(),
+            xx(vec![
+                x(),
+            ]),
+            x(),
+        ]),
+    ]);
+    let mut mt = t.clone();
+
+    let mut c = TreeCursor::new(&t);
+    let mut cm = TreeCursorMut::new(&mut mt);
+
+    {
+        assert!(c.down());
+        assert!(cm.down());
+        let mut c = c.get_new().unwrap();
+        let mut cm = cm.get_new().unwrap();
+        assert!(!c.up());
+        assert!(!cm.up());
+        {
+            assert!(c.down());
+            assert!(cm.down());
+            let mut c = c.get_new().unwrap();
+            let mut cm = cm.get_new().unwrap();
+            assert!(!c.up());
+            assert!(!cm.up());
+            assert!(!c.down());
+            assert!(!cm.down());
+            assert!(!c.up());
+            assert!(!cm.up());
+        }
+        {
+            assert!(c.down());
+            assert!(cm.down());
+            let mut c = c.get_new().unwrap();
+            let mut cm = cm.get_new().unwrap();
+            assert!(!c.up());
+            assert!(!cm.up());
+            {
+                assert!(c.down());
+                assert!(cm.down());
+                let mut c = c.get_new().unwrap();
+                let mut cm = cm.get_new().unwrap();
+                assert!(!c.up());
+                assert!(!cm.up());
+                assert!(!c.down());
+                assert!(!cm.down());
+                assert!(!c.up());
+                assert!(!cm.up());
+            }
+            assert!(!c.down());
+            assert!(!cm.down());
+            assert!(!c.up());
+            assert!(!cm.up());
+            assert!(c.down());
+            assert!(cm.down());
+        }
+        {
+            assert!(c.down());
+            assert!(cm.down());
+            let mut c = c.get_new().unwrap();
+            let mut cm = cm.get_new().unwrap();
+            assert!(!c.down());
+            assert!(!cm.down());
+        }
+        assert!(!c.down());
+        assert!(!cm.down());
+        assert!(!c.up());
+        assert!(!cm.up());
+        assert!(c.down());
+        assert!(cm.down());
+    }
+    assert!(!c.down());
+    assert!(!cm.down());
+    assert!(!c.up());
+    assert!(!cm.up());
+    assert!(c.down());
+    assert!(cm.down());
+}
+
+#[test]
 fn iter_down() {
     let t = xx(vec![
         xx(vec![

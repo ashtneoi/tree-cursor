@@ -76,6 +76,16 @@ impl<'n, N: 'n> TreeCursor<'n, N> {
         }
     }
 
+    pub fn get_new(&mut self) -> Option<Self> {
+        if self.stack.len() == 1 {
+            self.stack[0].1 = 0;
+            None
+        } else {
+            let (old_ptr, _) = self.stack.pop().unwrap();
+            Some(Self::new(unsafe { old_ptr.as_ref().unwrap() }))
+        }
+    }
+
     /// Returns a shared reference to the active node.
     pub fn get(&self) -> &N {
         let here: *const N = self.stack.last().unwrap().0;
@@ -187,6 +197,16 @@ impl<'n, N: 'n> TreeCursorMut<'n, N> {
         } else {
             self.stack.pop().unwrap();
             true
+        }
+    }
+
+    pub fn get_new(&mut self) -> Option<Self> {
+        if self.stack.len() == 1 {
+            self.stack[0].1 = 0;
+            None
+        } else {
+            let (old_ptr, _) = self.stack.pop().unwrap();
+            Some(Self::new(unsafe { old_ptr.as_mut().unwrap() }))
         }
     }
 
