@@ -160,9 +160,15 @@ pub mod prelude {
 mod tests;
 
 pub trait Down {
+    /// See [`TreeCursor::down`].
+    ///
+    /// [`TreeCursor::down`]: cursor::TreeCursor::down
     fn down(&self, idx: usize) -> Option<&Self>;
 }
 
 pub trait DownMut {
+    /// See [`TreeCursorMut::down`].
+    ///
+    /// [`TreeCursorMut::down`]: cursor::TreeCursorMut::down
     fn down_mut(&mut self, idx: usize) -> Option<&mut Self>;
 }
