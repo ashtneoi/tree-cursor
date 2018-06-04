@@ -218,42 +218,67 @@ fn scoped_down() {
             x(),
         ]),
     ]);
+    let mut mt = t.clone();
 
     let mut c = TreeCursor::new(&t);
+    let mut cm = TreeCursorMut::new(&mut mt);
 
     {
         let mut c = c.down_new().unwrap();
+        let mut cm = cm.down_new().unwrap();
         assert!(!c.up());
+        assert!(!cm.up());
         {
             let mut c = c.down_new().unwrap();
+            let mut cm = cm.down_new().unwrap();
             assert!(!c.up());
+            assert!(!cm.up());
             assert!(c.down_new().is_none());
+            assert!(cm.down_new().is_none());
             assert!(!c.up());
+            assert!(!cm.up());
         }
         {
             let mut c = c.down_new().unwrap();
+            let mut cm = cm.down_new().unwrap();
             assert!(!c.up());
+            assert!(!cm.up());
             {
                 let mut c = c.down_new().unwrap();
+                let mut cm = cm.down_new().unwrap();
                 assert!(!c.up());
+                assert!(!cm.up());
                 assert!(c.down_new().is_none());
+                assert!(cm.down_new().is_none());
                 assert!(!c.up());
+                assert!(!cm.up());
             }
             assert!(c.down_new().is_none());
+            assert!(cm.down_new().is_none());
             assert!(!c.up());
+            assert!(!cm.up());
             assert!(c.down());
+            assert!(cm.down());
         }
         {
             let mut c = c.down_new().unwrap();
+            let mut cm = cm.down_new().unwrap();
             assert!(c.down_new().is_none());
+            assert!(cm.down_new().is_none());
         }
         assert!(c.down_new().is_none());
+        assert!(cm.down_new().is_none());
         assert!(!c.up());
+        assert!(!cm.up());
         assert!(c.down());
+        assert!(cm.down());
     }
     assert!(c.down_new().is_none());
+    assert!(cm.down_new().is_none());
     assert!(!c.up());
+    assert!(!cm.up());
     assert!(c.down());
+    assert!(cm.down());
 }
 
 #[test]
