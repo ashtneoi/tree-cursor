@@ -130,6 +130,16 @@ impl<'n, N: 'n + Down> TreeCursor<'n, N> {
     }
 }
 
+impl<'n, N: 'n> From<TreeCursorMut<'n, N>> for TreeCursor<'n, N> {
+    fn from(mut cm: TreeCursorMut<'n, N>) -> Self {
+        TreeCursor {
+            root: PhantomData,
+            stack: cm.stack.drain(..).map(|(p, n)| (p as *const N, n))
+                .collect(),
+        }
+    }
+}
+
 /// A cursor that holds a mutable reference to its tree.
 #[derive(Debug, Eq, Hash, PartialEq)]
 pub struct TreeCursorMut<'n, N: 'n> {
