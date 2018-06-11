@@ -174,6 +174,8 @@ fn get() {
     assert_eq!(cm.get().v.len(), 0);
     assert_eq!(c2.get().v.len(), 0);
 
+    let cm_pos = cm.pos();
+
     assert!(!c.down());
     assert!(!c2.down());
     assert!(!cm.down());
@@ -237,6 +239,40 @@ fn get() {
     assert!(ptr::eq(cm.get() as *const X, cm.get_mut() as *const X));
     assert_eq!(cm.get().v.len(), 2);
     assert_eq!(c2.get().v.len(), 2);
+
+    cm.set_pos(&cm_pos).unwrap();
+
+    assert!(!cm.down());
+    assert!(ptr::eq(cm.get() as *const X, cm.get_mut() as *const X));
+    assert_eq!(cm.get().v.len(), 0);
+
+    assert!(cm.up());
+    assert!(ptr::eq(cm.get() as *const X, cm.get_mut() as *const X));
+    assert_eq!(cm.get().v.len(), 2);
+
+    assert!(!cm.down());
+    assert!(ptr::eq(cm.get() as *const X, cm.get_mut() as *const X));
+    assert_eq!(cm.get().v.len(), 2);
+
+    assert!(cm.up());
+    assert!(ptr::eq(cm.get() as *const X, cm.get_mut() as *const X));
+    assert_eq!(cm.get().v.len(), 2);
+
+    assert!(cm.down());
+    assert!(ptr::eq(cm.get() as *const X, cm.get_mut() as *const X));
+    assert_eq!(cm.get().v.len(), 0);
+
+    assert!(!cm.down());
+    assert!(ptr::eq(cm.get() as *const X, cm.get_mut() as *const X));
+    assert_eq!(cm.get().v.len(), 0);
+
+    assert!(cm.up());
+    assert!(ptr::eq(cm.get() as *const X, cm.get_mut() as *const X));
+    assert_eq!(cm.get().v.len(), 2);
+
+    assert!(!cm.up());
+    assert!(ptr::eq(cm.get() as *const X, cm.get_mut() as *const X));
+    assert_eq!(cm.get().v.len(), 2);
 }
 
 #[test]
