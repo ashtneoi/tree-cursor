@@ -1,4 +1,6 @@
 use prelude::*;
+use std::error::Error;
+use std::fmt;
 use std::marker::PhantomData;
 
 /// A cursor that holds a shared reference to its tree.
@@ -264,8 +266,18 @@ pub struct TreeCursorPos(Vec<usize>);
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum SetPosError {
+    /// A node was missing along the path from the root to the specified
+    /// position.
     MissingNode,
 }
+
+impl fmt::Display for SetPosError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "missing node along path from root to position")
+    }
+}
+
+impl Error for SetPosError { }
 
 impl<'n, N: 'n + DownMut> TreeCursorMut<'n, N> {
     /// Returns an opaque object that stores the current position of the cursor.
