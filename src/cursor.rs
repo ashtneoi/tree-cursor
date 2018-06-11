@@ -9,6 +9,14 @@ pub struct TreeCursor<'n, N: 'n> {
 }
 
 impl<'n, N: 'n> TreeCursor<'n, N> {
+    fn top(&self) -> &(*const N, usize) {
+        self.stack.last().unwrap()
+    }
+
+    fn top_mut(&mut self) -> &mut (*const N, usize) {
+        self.stack.last_mut().unwrap()
+    }
+
     /// Creates a new `TreeCursor` starting at `root`.
     pub fn new(root: &'n N) -> Self {
         Self {
@@ -21,11 +29,11 @@ impl<'n, N: 'n> TreeCursor<'n, N> {
     where
         F: Fn(&'n N, usize) -> Option<&'n N>,
     {
-        let idx = self.stack.last().unwrap().1;
+        let idx = self.top().1;
         let here_ptr = self.get() as *const N;
         let new_ptr =
             f(unsafe { here_ptr.as_ref().unwrap() }, idx)? as *const N;
-        self.stack.last_mut().unwrap().1 += 1;
+        self.top_mut().1 += 1;
         Some(new_ptr)
     }
 
@@ -58,7 +66,7 @@ impl<'n, N: 'n> TreeCursor<'n, N> {
 
     /// Resets the active node's "next child" counter to 0.
     pub fn zero(&mut self) {
-        self.stack.last_mut().unwrap().1 = 0;
+        self.top_mut().1 = 0;
     }
 
     /// Moves the cursor up one node. Returns true if there was a node to move
@@ -93,16 +101,16 @@ impl<'n, N: 'n> TreeCursor<'n, N> {
 
     /// Returns a shared reference to the active node.
     pub fn get(&self) -> &N {
-        let here: *const N = self.stack.last().unwrap().0;
+        let here: *const N = self.top().0;
         unsafe { here.as_ref().unwrap() }
     }
 }
 
 impl<'n, N: 'n + Down> TreeCursor<'n, N> {
     fn down_ptr(&mut self) -> Option<*const N> {
-        let idx = self.stack.last().unwrap().1;
+        let idx = self.top().1;
         let new_ptr = self.get().down(idx)? as *const N;
-        self.stack.last_mut().unwrap().1 += 1;
+        self.top_mut().1 += 1;
         Some(new_ptr)
     }
 
@@ -148,6 +156,14 @@ pub struct TreeCursorMut<'n, N: 'n> {
 }
 
 impl<'n, N: 'n> TreeCursorMut<'n, N> {
+    fn top(&self) -> &(*mut N, usize) {
+        self.stack.last().unwrap()
+    }
+
+    fn top_mut(&mut self) -> &mut (*mut N, usize) {
+        self.stack.last_mut().unwrap()
+    }
+
     /// Creates a new `TreeCursorMut` starting at `root`.
     pub fn new(root: &'n mut N) -> Self {
         let root_ptr: *mut N = root;
@@ -161,10 +177,10 @@ impl<'n, N: 'n> TreeCursorMut<'n, N> {
     where
         F: Fn(&'n mut N, usize) -> Option<&'n mut N>,
     {
-        let idx = self.stack.last().unwrap().1;
+        let idx = self.top().1;
         let here_ptr = self.get_mut() as *mut N;
         let new_ptr = f(unsafe { here_ptr.as_mut().unwrap() }, idx)? as *mut N;
-        self.stack.last_mut().unwrap().1 += 1;
+        self.top_mut().1 += 1;
         Some(new_ptr)
     }
 
@@ -197,7 +213,7 @@ impl<'n, N: 'n> TreeCursorMut<'n, N> {
 
     /// Resets the active node's "next child" counter to 0.
     pub fn zero(&mut self) {
-        self.stack.last_mut().unwrap().1 = 0;
+        self.top_mut().1 = 0;
     }
 
     /// Moves the cursor up one node. Returns true if there was a node to move
@@ -232,13 +248,13 @@ impl<'n, N: 'n> TreeCursorMut<'n, N> {
 
     /// Returns a shared reference to the active node.
     pub fn get(&self) -> &N {
-        let here: *const N = self.stack.last().unwrap().0;
+        let here: *const N = self.top().0;
         (unsafe { here.as_ref() }).unwrap()
     }
 
     /// Returns a mutable reference to the active node.
     pub fn get_mut(&mut self) -> &mut N {
-        let here = self.stack.last().unwrap().0;
+        let here = self.top().0;
         (unsafe { here.as_mut() }).unwrap()
     }
 }
