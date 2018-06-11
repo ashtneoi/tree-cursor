@@ -1,4 +1,4 @@
-use cursor::{TreeCursor, TreeCursorMut};
+use cursor::{SetPosError, TreeCursor, TreeCursorMut};
 use prelude::*;
 use std::ptr;
 
@@ -459,4 +459,61 @@ fn iter_down() {
         }
     }
     assert_eq!(leaf_count, 6);
+}
+
+#[test]
+fn set_pos_error() {
+    let mut t = xx(vec![
+        xx(vec![
+            x(),
+        ]),
+        x(),
+        xx(vec![
+            x(),
+            x(),
+        ]),
+    ]);
+
+    let mut cm = TreeCursorMut::new(&mut t);
+    assert_eq!(cm.get().v.len(), 3);
+
+    assert!(cm.down());
+    assert_eq!(cm.get().v.len(), 1);
+
+    assert!(cm.up());
+    assert_eq!(cm.get().v.len(), 3);
+
+    assert!(cm.down());
+    assert_eq!(cm.get().v.len(), 0);
+
+    assert!(cm.up());
+    assert_eq!(cm.get().v.len(), 3);
+
+    assert!(cm.down());
+    assert_eq!(cm.get().v.len(), 2);
+
+    let p = cm.pos();
+
+    cm.set_pos(&p).unwrap();
+    assert_eq!(cm.get().v.len(), 2);
+
+    assert!(cm.up());
+    assert_eq!(cm.get().v.len(), 3);
+
+    // set_pos() is idempotent.
+    cm.set_pos(&p).unwrap();
+    cm.set_pos(&p).unwrap();
+    assert_eq!(cm.get().v.len(), 2);
+
+    assert!(cm.up());
+    assert_eq!(cm.get().v.len(), 3);
+
+    cm.get_mut().v.pop().unwrap();
+
+    assert_eq!(cm.set_pos(&p).unwrap_err(), SetPosError::MissingNode);
+
+    cm.get_mut().v.pop().unwrap();
+    cm.get_mut().v.push(x());
+
+    assert_eq!(cm.set_pos(&p).unwrap_err(), SetPosError::MissingNode);
 }
