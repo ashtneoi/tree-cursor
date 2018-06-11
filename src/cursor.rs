@@ -288,7 +288,7 @@ impl<'n, N: 'n + DownMut> TreeCursorMut<'n, N> {
         TreeCursorPos(self.stack.iter().map(|&(_, idx)| idx).collect())
     }
 
-    /// Moves the cursor to the given position, assuming tree mutation hasn't
+    /// Moves the cursor to the given position, as long as tree mutation hasn't
     /// invalidated the position since it was retrieved.
     ///
     /// # Errors
