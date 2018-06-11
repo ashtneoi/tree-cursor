@@ -1,6 +1,5 @@
 use prelude::*;
 use std::marker::PhantomData;
-use std::ptr;
 
 /// A cursor that holds a shared reference to its tree.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
@@ -261,11 +260,10 @@ impl<'n, N: 'n> TreeCursorMut<'n, N> {
 }
 
 /// Stores a cursor's position at an earlier point in time.
-pub struct TreeCursorPos<N>(Vec<(*mut N, usize)>);
+pub struct TreeCursorPos(Vec<usize>);
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum SetPosError {
-    WrongNode,
     MissingNode,
 }
 
@@ -274,36 +272,32 @@ impl<'n, N: 'n + DownMut> TreeCursorMut<'n, N> {
     /// Pass it to [`set_pos`] to restore that position.
     ///
     /// [`set_pos`]: TreeCursorMut::set_pos
-    pub fn pos(&self) -> TreeCursorPos<N> {
-        TreeCursorPos(self.stack.clone())
+    pub fn pos(&self) -> TreeCursorPos {
+        TreeCursorPos(self.stack.iter().map(|&(_, idx)| idx).collect())
     }
 
-    /// Moves the cursor to the given position. See [`pos`].
+    /// Moves the cursor to the given position, assuming tree mutation hasn't
+    /// invalidated the position since it was retrieved.
     ///
     /// # Errors
     ///
-    /// If the tree has changed such that the position is no longer valid,
-    /// a [`SetPosError`] variant is returned.
+    /// If the tree has changed such that the position is no longer valid, a
+    /// [`SetPosError`] is returned. However, since the position is stored using
+    /// "next child" indices (not pointers), it remains valid as long as the
+    /// tree has a node in that position, even if the node's value changes or
+    /// it's replaced with another node. If this is a problem, you should track
+    /// the position's validity yourself.
     ///
     /// [`pos`]: TreeCursorMut::pos
-    pub fn set_pos(
-        &mut self,
-        pos: &TreeCursorPos<N>,
-    ) -> Result<(), SetPosError> {
+    pub fn set_pos(&mut self, pos: &TreeCursorPos) -> Result<(), SetPosError> {
         self.stack.truncate(1);
-        for &(here_ptr, idx) in pos.0.iter().rev().skip(1).rev() { // TODO: ugly
-            if !ptr::eq(self.top().0, here_ptr) {
-                return Err(SetPosError::WrongNode);
-            }
+        for &idx in pos.0.iter().rev().skip(1).rev() { // TODO: ugly
             self.top_mut().1 = idx - 1;
             if !self.down() {
                 return Err(SetPosError::MissingNode);
             }
         }
-        let &(here_ptr, idx) = pos.0.last().unwrap();
-        if !ptr::eq(self.top().0, here_ptr) {
-            return Err(SetPosError::WrongNode);
-        }
+        let &idx = pos.0.last().unwrap();
         self.top_mut().1 = idx;
         Ok(())
     }
