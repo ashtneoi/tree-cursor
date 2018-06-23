@@ -3,26 +3,30 @@ use std::marker::PhantomData;
 
 /// A cursor that holds a shared reference to its tree.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
-pub struct TreeCursor<'n, N: 'n> {
+pub struct TreeCursor<'n: 'f, 'f, N: 'n> {
     root: PhantomData<&'n N>,
+    frozen: PhantomData<&'f ()>,
     stack: Vec<(*const N, usize)>,
 }
 
-impl<'n, N: 'n> TreeCursor<'n, N> {
+impl<'n, N: 'n> TreeCursor<'n, 'n, N> {
+    /// Creates a new `TreeCursor` starting at `root`.
+    pub fn new(root: &'n N) -> Self {
+        Self {
+            root: PhantomData,
+            frozen: PhantomData,
+            stack: vec![(root as *const N, 0)],
+        }
+    }
+}
+
+impl<'n: 'f, 'f, N: 'n> TreeCursor<'n, 'f, N> {
     fn top(&self) -> &(*const N, usize) {
         self.stack.last().unwrap()
     }
 
     fn top_mut(&mut self) -> &mut (*const N, usize) {
         self.stack.last_mut().unwrap()
-    }
-
-    /// Creates a new `TreeCursor` starting at `root`.
-    pub fn new(root: &'n N) -> Self {
-        Self {
-            root: PhantomData,
-            stack: vec![(root as *const N, 0)],
-        }
     }
 
     fn down_map_ptr<F>(&mut self, f: F) -> Option<*const N>
@@ -56,12 +60,17 @@ impl<'n, N: 'n> TreeCursor<'n, N> {
     ///
     /// [`down_new`]: TreeCursor::down_new
     /// [`down_map`]: TreeCursor::down_map
-    pub fn down_map_new<F>(&mut self, f: F) -> Option<Self>
+    pub fn down_map_new<'s, F>(&'s mut self, f: F)
+        -> Option<TreeCursor<'n, 's, N>>
     where
         F: Fn(&'n N, usize) -> Option<&'n N>,
     {
         let new_ptr = self.down_map_ptr(f)?;
-        Some(Self::new(unsafe { new_ptr.as_ref().unwrap() }))
+        Some(Self {
+            root: PhantomData,
+            frozen: PhantomData,
+            stack: vec![(new_ptr, 0)],
+        })
     }
 
     /// Resets the active node's "next child" counter to 0.
@@ -84,18 +93,20 @@ impl<'n, N: 'n> TreeCursor<'n, N> {
         }
     }
 
-    /// Like [`up`], except it also returns a new `TreeCursor` whose root is
-    /// the old position. `self` is frozen until the new cursor goes out of
-    /// scope.
-    ///
-    /// [`up`]: TreeCursor::up
-    pub fn take(&mut self) -> Option<Self> {
+    /// Takes the active node from this `TreeCursor` and returns a new
+    /// `TreeCursor` at that position. `self` is frozen until the new cursor
+    /// goes out of scope.
+    pub fn take<'s>(&'s mut self) -> Option<TreeCursor<'n, 's, N>> {
         if self.stack.len() == 1 {
-            self.stack[0].1 = 0;
             None
         } else {
-            let (old_ptr, _) = self.stack.pop().unwrap();
-            Some(Self::new(unsafe { old_ptr.as_ref().unwrap() }))
+            let (old_ptr, old_idx) = self.stack.pop().unwrap();
+            let old = unsafe { old_ptr.as_ref().unwrap() };
+            Some(Self {
+                root: PhantomData,
+                frozen: PhantomData,
+                stack: vec![(old, old_idx)],
+            })
         }
     }
 
@@ -106,7 +117,7 @@ impl<'n, N: 'n> TreeCursor<'n, N> {
     }
 }
 
-impl<'n, N: 'n + Down> TreeCursor<'n, N> {
+impl<'n: 'f, 'f, N: 'n + Down> TreeCursor<'n, 'f, N> {
     fn down_ptr(&mut self) -> Option<*const N> {
         let idx = self.top().1;
         let new_ptr = self.get().down(idx)? as *const N;
@@ -132,45 +143,55 @@ impl<'n, N: 'n + Down> TreeCursor<'n, N> {
     /// frozen until the new cursor goes out of scope.
     ///
     /// [`down`]: TreeCursor::down
-    pub fn down_new(&mut self) -> Option<Self> {
+    pub fn down_new<'s>(&'s mut self) -> Option<TreeCursor<'n, 's, N>> {
         let new_ptr = self.down_ptr()?;
-        Some(Self::new(unsafe { new_ptr.as_ref().unwrap() }))
+        Some(Self {
+            root: PhantomData,
+            frozen: PhantomData,
+            stack: vec![(new_ptr, 0)],
+        })
     }
 }
 
-impl<'n, N: 'n> From<TreeCursorMut<'n, N>> for TreeCursor<'n, N> {
-    fn from(mut cm: TreeCursorMut<'n, N>) -> Self {
+impl<'n: 'f, 'f, N: 'n> From<TreeCursorMut<'n, 'f, N>>
+    for TreeCursor<'n, 'f, N>
+{
+    fn from(mut cm: TreeCursorMut<'n, 'f, N>) -> Self {
         TreeCursor {
             root: PhantomData,
+            frozen: PhantomData,
             stack: cm.stack.drain(..).map(|(p, n)| (p as *const N, n))
-                .collect(),
+                .collect(), // TODO: speed this up
         }
     }
 }
 
 /// A cursor that holds a mutable reference to its tree.
 #[derive(Debug, Eq, Hash, PartialEq)]
-pub struct TreeCursorMut<'n, N: 'n> {
+pub struct TreeCursorMut<'n: 'f, 'f, N: 'n> {
     root: PhantomData<&'n mut N>,
+    frozen: PhantomData<&'f ()>,
     stack: Vec<(*mut N, usize)>,
 }
 
-impl<'n, N: 'n> TreeCursorMut<'n, N> {
+impl<'n, N: 'n> TreeCursorMut<'n, 'n, N> {
+    /// Creates a new `TreeCursorMut` starting at `root`.
+    pub fn new(root: &'n mut N) -> Self {
+        Self {
+            root: PhantomData,
+            frozen: PhantomData,
+            stack: vec![(root as *mut N, 0)],
+        }
+    }
+}
+
+impl<'n: 'f, 'f, N: 'n> TreeCursorMut<'n, 'f, N> {
     fn top(&self) -> &(*mut N, usize) {
         self.stack.last().unwrap()
     }
 
     fn top_mut(&mut self) -> &mut (*mut N, usize) {
         self.stack.last_mut().unwrap()
-    }
-
-    /// Creates a new `TreeCursorMut` starting at `root`.
-    pub fn new(root: &'n mut N) -> Self {
-        let root_ptr: *mut N = root;
-        Self {
-            root: PhantomData,
-            stack: vec![(root_ptr, 0)],
-        }
     }
 
     fn down_map_ptr<F>(&mut self, f: F) -> Option<*mut N>
@@ -203,12 +224,17 @@ impl<'n, N: 'n> TreeCursorMut<'n, N> {
     ///
     /// [`down_new`]: TreeCursorMut::down_new
     /// [`down_map`]: TreeCursorMut::down_map
-    pub fn down_map_new<F>(&mut self, f: F) -> Option<Self>
+    pub fn down_map_new<'s, F>(&'s mut self, f: F)
+        -> Option<TreeCursorMut<'n, 's, N>>
     where
         F: Fn(&'n mut N, usize) -> Option<&'n mut N>,
     {
         let new_ptr = self.down_map_ptr(f)?;
-        Some(Self::new(unsafe { new_ptr.as_mut().unwrap() }))
+        Some(Self {
+            root: PhantomData,
+            frozen: PhantomData,
+            stack: vec![(new_ptr, 0)],
+        })
     }
 
     /// Resets the active node's "next child" counter to 0.
@@ -231,18 +257,20 @@ impl<'n, N: 'n> TreeCursorMut<'n, N> {
         }
     }
 
-    /// Like [`up`], except it also returns a new `TreeCursorMut` whose root is
-    /// the old position. `self` is frozen until the new cursor goes out of
-    /// scope.
-    ///
-    /// [`up`]: TreeCursorMut::up
-    pub fn take(&mut self) -> Option<Self> {
+    /// Takes the active node from this `TreeCursorMut` and returns a new
+    /// `TreeCursorMut` at that position. `self` is frozen until the new cursor
+    /// goes out of scope.
+    pub fn take<'s>(&'s mut self) -> Option<TreeCursorMut<'n, 's, N>> {
         if self.stack.len() == 1 {
-            self.stack[0].1 = 0;
             None
         } else {
-            let (old_ptr, _) = self.stack.pop().unwrap();
-            Some(Self::new(unsafe { old_ptr.as_mut().unwrap() }))
+            let (old_ptr, old_idx) = self.stack.pop().unwrap();
+            let old = unsafe { old_ptr.as_mut().unwrap() };
+            Some(Self {
+                root: PhantomData,
+                frozen: PhantomData,
+                stack: vec![(old, old_idx)],
+            })
         }
     }
 
@@ -257,12 +285,21 @@ impl<'n, N: 'n> TreeCursorMut<'n, N> {
         let here = self.top().0;
         (unsafe { here.as_mut() }).unwrap()
     }
+
+    pub fn as_cursor<'s>(&'s self) -> TreeCursor<'n, 's, N> {
+        TreeCursor {
+            root: PhantomData,
+            frozen: PhantomData,
+            stack: self.stack.iter()
+                .map(|&(p, n)| (p as *const N, n)).collect(),
+        }
+    }
 }
 
 /// Stores a cursor's position at an earlier point in time.
 pub struct TreeCursorPos(Vec<usize>);
 
-impl<'n, N: 'n + DownMut> TreeCursorMut<'n, N> {
+impl<'n: 'f, 'f, N: 'n + DownMut> TreeCursorMut<'n, 'f, N> {
     /// Returns an opaque object that stores the current position of the cursor.
     /// Pass it to [`set_pos`] to restore that position.
     ///
@@ -321,8 +358,12 @@ impl<'n, N: 'n + DownMut> TreeCursorMut<'n, N> {
     /// frozen until the new cursor goes out of scope.
     ///
     /// [`down`]: TreeCursorMut::down
-    pub fn down_new(&mut self) -> Option<Self> {
+    pub fn down_new<'s>(&'s mut self) -> Option<TreeCursorMut<'n, 's, N>> {
         let new_ptr = self.down_ptr()?;
-        Some(Self::new(unsafe { new_ptr.as_mut().unwrap() }))
+        Some(Self {
+            root: PhantomData,
+            frozen: PhantomData,
+            stack: vec![(new_ptr, 0)],
+        })
     }
 }
