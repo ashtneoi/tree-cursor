@@ -91,7 +91,7 @@ impl<'n, N: 'n> TreeCursor<'n, N> {
     /// scope.
     ///
     /// [`up`]: TreeCursor::up
-    pub fn get_new(&mut self) -> Option<Self> {
+    pub fn take(&mut self) -> Option<Self> {
         if self.stack.len() == 1 {
             self.stack[0].1 = 0;
             None
@@ -238,7 +238,7 @@ impl<'n, N: 'n> TreeCursorMut<'n, N> {
     /// scope.
     ///
     /// [`up`]: TreeCursorMut::up
-    pub fn get_new(&mut self) -> Option<Self> {
+    pub fn take(&mut self) -> Option<Self> {
         if self.stack.len() == 1 {
             self.stack[0].1 = 0;
             None

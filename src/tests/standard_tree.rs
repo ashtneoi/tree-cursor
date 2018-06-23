@@ -350,7 +350,7 @@ fn scoped_down() {
 }
 
 #[test]
-fn scoped_here() {
+fn take() {
     let t = xx(vec![
         xx(vec![
             x(),
@@ -368,15 +368,15 @@ fn scoped_here() {
     {
         assert!(c.down());
         assert!(cm.down());
-        let mut c = c.get_new().unwrap();
-        let mut cm = cm.get_new().unwrap();
+        let mut c = c.take().unwrap();
+        let mut cm = cm.take().unwrap();
         assert!(!c.up());
         assert!(!cm.up());
         {
             assert!(c.down());
             assert!(cm.down());
-            let mut c = c.get_new().unwrap();
-            let mut cm = cm.get_new().unwrap();
+            let mut c = c.take().unwrap();
+            let mut cm = cm.take().unwrap();
             assert!(!c.up());
             assert!(!cm.up());
             assert!(!c.down());
@@ -387,15 +387,15 @@ fn scoped_here() {
         {
             assert!(c.down());
             assert!(cm.down());
-            let mut c = c.get_new().unwrap();
-            let mut cm = cm.get_new().unwrap();
+            let mut c = c.take().unwrap();
+            let mut cm = cm.take().unwrap();
             assert!(!c.up());
             assert!(!cm.up());
             {
                 assert!(c.down());
                 assert!(cm.down());
-                let mut c = c.get_new().unwrap();
-                let mut cm = cm.get_new().unwrap();
+                let mut c = c.take().unwrap();
+                let mut cm = cm.take().unwrap();
                 assert!(!c.up());
                 assert!(!cm.up());
                 assert!(!c.down());
@@ -413,8 +413,8 @@ fn scoped_here() {
         {
             assert!(c.down());
             assert!(cm.down());
-            let mut c = c.get_new().unwrap();
-            let mut cm = cm.get_new().unwrap();
+            let mut c = c.take().unwrap();
+            let mut cm = cm.take().unwrap();
             assert!(!c.down());
             assert!(!cm.down());
         }
