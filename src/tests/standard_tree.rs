@@ -1,4 +1,4 @@
-use cursor::{SetPosError, TreeCursor, TreeCursorMut};
+use cursor::{TreeCursor, TreeCursorMut};
 use prelude::*;
 use std::ptr;
 
@@ -240,7 +240,7 @@ fn get() {
     assert_eq!(cm.get().v.len(), 2);
     assert_eq!(c2.get().v.len(), 2);
 
-    cm.set_pos(&cm_pos).unwrap();
+    cm.set_pos(&cm_pos);
 
     assert!(!cm.down());
     assert!(ptr::eq(cm.get() as *const X, cm.get_mut() as *const X));
@@ -494,26 +494,17 @@ fn set_pos_error() {
 
     let p = cm.pos();
 
-    cm.set_pos(&p).unwrap();
+    cm.set_pos(&p);
     assert_eq!(cm.get().v.len(), 2);
 
     assert!(cm.up());
     assert_eq!(cm.get().v.len(), 3);
 
     // set_pos() is idempotent.
-    cm.set_pos(&p).unwrap();
-    cm.set_pos(&p).unwrap();
+    cm.set_pos(&p);
+    cm.set_pos(&p);
     assert_eq!(cm.get().v.len(), 2);
 
     assert!(cm.up());
     assert_eq!(cm.get().v.len(), 3);
-
-    cm.get_mut().v.pop().unwrap();
-
-    assert_eq!(cm.set_pos(&p).unwrap_err(), SetPosError::MissingNode);
-
-    cm.get_mut().v.pop().unwrap();
-    cm.get_mut().v.push(x());
-
-    assert_eq!(cm.set_pos(&p).unwrap_err(), SetPosError::MissingNode);
 }

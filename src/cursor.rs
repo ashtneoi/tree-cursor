@@ -1,6 +1,4 @@
 use prelude::*;
-use std::error::Error;
-use std::fmt;
 use std::marker::PhantomData;
 
 /// A cursor that holds a shared reference to its tree.
@@ -264,21 +262,6 @@ impl<'n, N: 'n> TreeCursorMut<'n, N> {
 /// Stores a cursor's position at an earlier point in time.
 pub struct TreeCursorPos(Vec<usize>);
 
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-pub enum SetPosError {
-    /// A node was missing along the path from the root to the specified
-    /// position.
-    MissingNode,
-}
-
-impl fmt::Display for SetPosError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "missing node along path from root to position")
-    }
-}
-
-impl Error for SetPosError { }
-
 impl<'n, N: 'n + DownMut> TreeCursorMut<'n, N> {
     /// Returns an opaque object that stores the current position of the cursor.
     /// Pass it to [`set_pos`] to restore that position.
@@ -301,17 +284,16 @@ impl<'n, N: 'n + DownMut> TreeCursorMut<'n, N> {
     /// the position's validity yourself.
     ///
     /// [`pos`]: TreeCursorMut::pos
-    pub fn set_pos(&mut self, pos: &TreeCursorPos) -> Result<(), SetPosError> {
+    pub fn set_pos(&mut self, pos: &TreeCursorPos) {
         self.stack.truncate(1);
         for &idx in pos.0.iter().rev().skip(1).rev() { // TODO: ugly
             self.top_mut().1 = idx - 1;
             if !self.down() {
-                return Err(SetPosError::MissingNode);
+                panic!("missing node in TreeCursorPos");
             }
         }
         let &idx = pos.0.last().unwrap();
         self.top_mut().1 = idx;
-        Ok(())
     }
 
     fn down_ptr(&mut self) -> Option<*mut N> {
