@@ -58,12 +58,11 @@ impl<'n, N: 'n> TreeCursor<'n, N> {
     ///
     /// [`down_new`]: TreeCursor::down_new
     /// [`down_map`]: TreeCursor::down_map
-    pub fn down_map_new<F>(&mut self, f: F) -> Option<Self>
+    pub fn down_map_new<F>(&mut self, _: F) -> Option<Self>
     where
         F: Fn(&'n N, usize) -> Option<&'n N>,
     {
-        let new_ptr = self.down_map_ptr(f)?;
-        Some(Self::new(unsafe { new_ptr.as_ref().unwrap() }))
+        panic!("This method isn't memory safe!");
     }
 
     /// Resets the active node's "next child" counter to 0.
@@ -205,12 +204,11 @@ impl<'n, N: 'n> TreeCursorMut<'n, N> {
     ///
     /// [`down_new`]: TreeCursorMut::down_new
     /// [`down_map`]: TreeCursorMut::down_map
-    pub fn down_map_new<F>(&mut self, f: F) -> Option<Self>
+    pub fn down_map_new<F>(&mut self, _: F) -> Option<Self>
     where
         F: Fn(&'n mut N, usize) -> Option<&'n mut N>,
     {
-        let new_ptr = self.down_map_ptr(f)?;
-        Some(Self::new(unsafe { new_ptr.as_mut().unwrap() }))
+        panic!("This method isn't memory safe!");
     }
 
     /// Resets the active node's "next child" counter to 0.
