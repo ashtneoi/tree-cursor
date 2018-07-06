@@ -311,14 +311,14 @@ impl<'n: 'f, 'f, N: 'n + DownMut> TreeCursorMut<'n, 'f, N> {
     /// Moves the cursor to the given position, as long as tree mutation hasn't
     /// invalidated the position since it was retrieved.
     ///
-    /// # Errors
+    /// # Panics
     ///
-    /// If the tree has changed such that the position is no longer valid, a
-    /// [`SetPosError`] is returned. However, since the position is stored using
-    /// "next child" indices (not pointers), it remains valid as long as the
-    /// tree has a node in that position, even if the node's value changes or
-    /// it's replaced with another node. If this is a problem, you should track
-    /// the position's validity yourself.
+    /// If the tree has changed such that the position is no longer valid, this
+    /// method panics. However, since the position is stored using "next child"
+    /// indices (not pointers), it remains valid as long as the tree has a node
+    /// in that position, even if the node's value changes or it's replaced with
+    /// another node. If this is a problem, you should track the position's
+    /// validity yourself.
     ///
     /// [`pos`]: TreeCursorMut::pos
     pub fn set_pos(&mut self, pos: &TreeCursorPos) {
