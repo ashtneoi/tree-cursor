@@ -23,8 +23,8 @@
 //! - each node has zero or more children
 //! - "up" is toward the root
 //! - "down" is away from the root
-//! - at any point in time, a cursor has exactly one *active* node, also called
-//!   the cursor's *position*
+//! - at any point in time, a cursor has a *position*, and the node at that
+//!   position is considered *active*
 //!
 //! # Guided tour
 //!
