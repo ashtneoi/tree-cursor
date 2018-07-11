@@ -292,57 +292,57 @@ fn scoped_down() {
     let mut cm = TreeCursorMut::new(&mut mt);
 
     {
-        let mut c = c.down_new().unwrap();
-        let mut cm = cm.down_new().unwrap();
+        let mut c = c.down_take_cursor().unwrap();
+        let mut cm = cm.down_take_cursor().unwrap();
         assert!(!c.up());
         assert!(!cm.up());
         {
-            let mut c = c.down_new().unwrap();
-            let mut cm = cm.down_new().unwrap();
+            let mut c = c.down_take_cursor().unwrap();
+            let mut cm = cm.down_take_cursor().unwrap();
             assert!(!c.up());
             assert!(!cm.up());
-            assert!(c.down_new().is_none());
-            assert!(cm.down_new().is_none());
+            assert!(c.down_take_cursor().is_none());
+            assert!(cm.down_take_cursor().is_none());
             assert!(!c.up());
             assert!(!cm.up());
         }
         {
-            let mut c = c.down_new().unwrap();
-            let mut cm = cm.down_new().unwrap();
+            let mut c = c.down_take_cursor().unwrap();
+            let mut cm = cm.down_take_cursor().unwrap();
             assert!(!c.up());
             assert!(!cm.up());
             {
-                let mut c = c.down_new().unwrap();
-                let mut cm = cm.down_new().unwrap();
+                let mut c = c.down_take_cursor().unwrap();
+                let mut cm = cm.down_take_cursor().unwrap();
                 assert!(!c.up());
                 assert!(!cm.up());
-                assert!(c.down_new().is_none());
-                assert!(cm.down_new().is_none());
+                assert!(c.down_take_cursor().is_none());
+                assert!(cm.down_take_cursor().is_none());
                 assert!(!c.up());
                 assert!(!cm.up());
             }
-            assert!(c.down_new().is_none());
-            assert!(cm.down_new().is_none());
+            assert!(c.down_take_cursor().is_none());
+            assert!(cm.down_take_cursor().is_none());
             assert!(!c.up());
             assert!(!cm.up());
             assert!(c.down());
             assert!(cm.down());
         }
         {
-            let mut c = c.down_new().unwrap();
-            let mut cm = cm.down_new().unwrap();
-            assert!(c.down_new().is_none());
-            assert!(cm.down_new().is_none());
+            let mut c = c.down_take_cursor().unwrap();
+            let mut cm = cm.down_take_cursor().unwrap();
+            assert!(c.down_take_cursor().is_none());
+            assert!(cm.down_take_cursor().is_none());
         }
-        assert!(c.down_new().is_none());
-        assert!(cm.down_new().is_none());
+        assert!(c.down_take_cursor().is_none());
+        assert!(cm.down_take_cursor().is_none());
         assert!(!c.up());
         assert!(!cm.up());
         assert!(c.down());
         assert!(cm.down());
     }
-    assert!(c.down_new().is_none());
-    assert!(cm.down_new().is_none());
+    assert!(c.down_take_cursor().is_none());
+    assert!(cm.down_take_cursor().is_none());
     assert!(!c.up());
     assert!(!cm.up());
     assert!(c.down());
@@ -368,15 +368,15 @@ fn take() {
     {
         assert!(c.down());
         assert!(cm.down());
-        let mut c = c.take().unwrap();
-        let mut cm = cm.take().unwrap();
+        let mut c = c.take_cursor().unwrap();
+        let mut cm = cm.take_cursor().unwrap();
         assert!(!c.up());
         assert!(!cm.up());
         {
             assert!(c.down());
             assert!(cm.down());
-            let mut c = c.take().unwrap();
-            let mut cm = cm.take().unwrap();
+            let mut c = c.take_cursor().unwrap();
+            let mut cm = cm.take_cursor().unwrap();
             assert!(!c.up());
             assert!(!cm.up());
             assert!(!c.down());
@@ -387,15 +387,15 @@ fn take() {
         {
             assert!(c.down());
             assert!(cm.down());
-            let mut c = c.take().unwrap();
-            let mut cm = cm.take().unwrap();
+            let mut c = c.take_cursor().unwrap();
+            let mut cm = cm.take_cursor().unwrap();
             assert!(!c.up());
             assert!(!cm.up());
             {
                 assert!(c.down());
                 assert!(cm.down());
-                let mut c = c.take().unwrap();
-                let mut cm = cm.take().unwrap();
+                let mut c = c.take_cursor().unwrap();
+                let mut cm = cm.take_cursor().unwrap();
                 assert!(!c.up());
                 assert!(!cm.up());
                 assert!(!c.down());
@@ -413,8 +413,8 @@ fn take() {
         {
             assert!(c.down());
             assert!(cm.down());
-            let mut c = c.take().unwrap();
-            let mut cm = cm.take().unwrap();
+            let mut c = c.take_cursor().unwrap();
+            let mut cm = cm.take_cursor().unwrap();
             assert!(!c.down());
             assert!(!cm.down());
         }
@@ -453,8 +453,8 @@ fn iter_down() {
     let mut c = TreeCursor::new(&t);
 
     let mut leaf_count = 0;
-    while let Some(mut c) = c.down_new() {
-        while let Some(_) = c.down_new() {
+    while let Some(mut c) = c.down_take_cursor() {
+        while let Some(_) = c.down_take_cursor() {
             leaf_count += 1;
         }
     }
