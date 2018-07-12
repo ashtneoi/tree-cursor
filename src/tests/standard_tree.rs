@@ -2,7 +2,7 @@ use cursor::{TreeCursor, TreeCursorMut};
 use prelude::*;
 use std::ptr;
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 struct X {
     v: Vec<X>,
 }
@@ -16,6 +16,12 @@ impl Down for X {
 impl DownMut for X {
     fn down_mut(&mut self, idx: usize) -> Option<&mut Self> {
         self.v.get_mut(idx)
+    }
+}
+
+impl TakeChild for X {
+    fn take_child(&mut self, idx: usize) -> Self {
+        self.v.remove(idx)
     }
 }
 
@@ -507,4 +513,40 @@ fn set_pos_error() {
 
     assert!(cm.up());
     assert_eq!(cm.get().v.len(), 3);
+}
+
+#[test]
+fn take_node() {
+    let mut t = xx(vec![
+        xx(vec![
+            x(),
+            x(),
+            x(),
+        ]),
+        x(),
+    ]);
+
+    let mut cm = TreeCursorMut::new(&mut t);
+    assert_eq!(cm.get().v.len(), 2);
+
+    assert!(cm.down());
+    assert_eq!(cm.get().v.len(), 3);
+
+    {
+        let txx = cm.take_node().unwrap();
+        assert_eq!(txx.v.len(), 3);
+        assert_eq!(cm.get().v.len(), 1);
+    }
+
+    assert!(cm.down());
+    assert_eq!(cm.get().v.len(), 0);
+
+    {
+        let txx = cm.take_node().unwrap();
+        assert_eq!(txx.v.len(), 0);
+        assert_eq!(cm.get().v.len(), 0);
+    }
+
+    // Can't take the root node.
+    assert_eq!(cm.take_node(), None);
 }

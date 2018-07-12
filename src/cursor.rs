@@ -298,6 +298,20 @@ impl<'n: 'f, 'f, N: 'n> TreeCursorMut<'n, 'f, N> {
     }
 }
 
+impl<'n: 'f, 'f, N: 'n + TakeChild> TreeCursorMut<'n, 'f, N> {
+    pub fn take_node<'s>(&'s mut self) -> Option<N> {
+        if self.up() {
+            let (here_ptr, here_idx) = self.stack.last_mut().unwrap();
+            let here = unsafe { here_ptr.as_mut().unwrap() };
+            assert!(*here_idx > 0);
+            *here_idx -= 1;
+            Some(here.take_child(*here_idx))
+        } else {
+            None
+        }
+    }
+}
+
 /// Stores a cursor's position at an earlier point in time.
 pub struct TreeCursorPos(Vec<usize>);
 

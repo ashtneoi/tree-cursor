@@ -147,7 +147,7 @@
 pub mod cursor;
 
 pub mod prelude {
-    pub use super::{Down, DownMut};
+    pub use super::{Down, DownMut, TakeChild};
 }
 
 #[cfg(test)]
@@ -165,4 +165,8 @@ pub trait DownMut {
     ///
     /// [`TreeCursorMut::down`]: cursor::TreeCursorMut::down
     fn down_mut(&mut self, idx: usize) -> Option<&mut Self>;
+}
+
+pub trait TakeChild {
+    fn take_child(&mut self, idx: usize) -> Self;
 }
