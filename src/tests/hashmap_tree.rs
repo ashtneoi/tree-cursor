@@ -34,8 +34,8 @@ fn down_map() {
     assert_eq!(c.get().x, 0);
     assert_eq!(cm.get().x, 0);
 
-    assert!(c.down_map(|n, _| n.m.get("foo")));
-    assert!(cm.down_map(|n, _| n.m.get_mut("foo")));
+    assert!(c.down_with(|n, _| n.m.get("foo")));
+    assert!(cm.down_with(|n, _| n.m.get_mut("foo")));
     assert_eq!(c.get().x, 1);
     assert_eq!(cm.get().x, 1);
 
@@ -44,13 +44,13 @@ fn down_map() {
     assert_eq!(c.get().x, 0);
     assert_eq!(cm.get().x, 0);
 
-    assert!(c.down_map(|n, _| n.m.get("bar")));
-    assert!(cm.down_map(|n, _| n.m.get_mut("bar")));
+    assert!(c.down_with(|n, _| n.m.get("bar")));
+    assert!(cm.down_with(|n, _| n.m.get_mut("bar")));
     assert_eq!(c.get().x, 2);
     assert_eq!(cm.get().x, 2);
 
-    assert!(c.down_map(|n, _| n.m.get("rue")));
-    assert!(cm.down_map(|n, _| n.m.get_mut("rue")));
+    assert!(c.down_with(|n, _| n.m.get("rue")));
+    assert!(cm.down_with(|n, _| n.m.get_mut("rue")));
     assert_eq!(c.get().x, 3);
     assert_eq!(cm.get().x, 3);
 
@@ -69,8 +69,8 @@ fn down_map() {
     assert_eq!(c.get().x, 0);
     assert_eq!(cm.get().x, 0);
 
-    assert!(c.down_map(|n, _| n.m.get("foo")));
-    assert!(cm.down_map(|n, _| n.m.get_mut("foo")));
+    assert!(c.down_with(|n, _| n.m.get("foo")));
+    assert!(cm.down_with(|n, _| n.m.get_mut("foo")));
     assert_eq!(c.get().x, 1);
     assert_eq!(cm.get().x, 1);
 }

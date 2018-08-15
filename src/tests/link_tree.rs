@@ -64,41 +64,23 @@ fn link_tree() {
     assert_eq!(&c.get().target, "foo");
     assert_eq!(&cm.get().target, "foo");
 
-    assert!(c.down_map(d));
-    assert!(cm.down_map(md));
+    assert!(c.down_with(d));
+    assert!(cm.down_with(md));
     assert_eq!(&c.get().target, "bar");
     assert_eq!(&cm.get().target, "bar");
 
-    assert!(c.down_map(d));
-    assert!(cm.down_map(md));
+    assert!(c.down_with(d));
+    assert!(cm.down_with(md));
     assert_eq!(&c.get().target, "fuzz");
     assert_eq!(&cm.get().target, "fuzz");
 
-    assert!(c.down_map(d));
-    assert!(cm.down_map(md));
+    assert!(c.down_with(d));
+    assert!(cm.down_with(md));
     assert_eq!(&c.get().target, "bar");
     assert_eq!(&cm.get().target, "bar");
 
-    assert!(c.down_map(d));
-    assert!(cm.down_map(md));
-    assert_eq!(&c.get().target, "fuzz");
-    assert_eq!(&cm.get().target, "fuzz");
-
-    assert!(c.up());
-    assert!(cm.up());
-    assert_eq!(&c.get().target, "bar");
-    assert_eq!(&cm.get().target, "bar");
-    assert!(!c.down_map(d));
-    assert!(!cm.down_map(md));
-    assert_eq!(&c.get().target, "bar");
-    assert_eq!(&cm.get().target, "bar");
-
-    assert!(c.up());
-    assert!(cm.up());
-    assert_eq!(&c.get().target, "fuzz");
-    assert_eq!(&cm.get().target, "fuzz");
-    assert!(!c.down_map(d));
-    assert!(!cm.down_map(md));
+    assert!(c.down_with(d));
+    assert!(cm.down_with(md));
     assert_eq!(&c.get().target, "fuzz");
     assert_eq!(&cm.get().target, "fuzz");
 
@@ -106,8 +88,26 @@ fn link_tree() {
     assert!(cm.up());
     assert_eq!(&c.get().target, "bar");
     assert_eq!(&cm.get().target, "bar");
-    assert!(!c.down_map(d));
-    assert!(!cm.down_map(md));
+    assert!(!c.down_with(d));
+    assert!(!cm.down_with(md));
+    assert_eq!(&c.get().target, "bar");
+    assert_eq!(&cm.get().target, "bar");
+
+    assert!(c.up());
+    assert!(cm.up());
+    assert_eq!(&c.get().target, "fuzz");
+    assert_eq!(&cm.get().target, "fuzz");
+    assert!(!c.down_with(d));
+    assert!(!cm.down_with(md));
+    assert_eq!(&c.get().target, "fuzz");
+    assert_eq!(&cm.get().target, "fuzz");
+
+    assert!(c.up());
+    assert!(cm.up());
+    assert_eq!(&c.get().target, "bar");
+    assert_eq!(&cm.get().target, "bar");
+    assert!(!c.down_with(d));
+    assert!(!cm.down_with(md));
     assert_eq!(&c.get().target, "bar");
     assert_eq!(&cm.get().target, "bar");
 
@@ -115,8 +115,8 @@ fn link_tree() {
     assert!(cm.up());
     assert_eq!(&c.get().target, "foo");
     assert_eq!(&cm.get().target, "foo");
-    assert!(!c.down_map(d));
-    assert!(!cm.down_map(md));
+    assert!(!c.down_with(d));
+    assert!(!cm.down_with(md));
     assert_eq!(&c.get().target, "foo");
     assert_eq!(&cm.get().target, "foo");
 
@@ -125,8 +125,8 @@ fn link_tree() {
     assert_eq!(&c.get().target, "foo");
     assert_eq!(&cm.get().target, "foo");
 
-    assert!(c.down_map(d));
-    assert!(cm.down_map(md));
+    assert!(c.down_with(d));
+    assert!(cm.down_with(md));
     assert_eq!(&c.get().target, "bar");
     assert_eq!(&cm.get().target, "bar");
 }
@@ -165,23 +165,23 @@ fn link_tree_scoped_down() {
     assert_eq!(&c.get().target, "foo");
     assert_eq!(&cm.get().target, "foo");
     {
-        let mut c2 = c.down_map_take_cursor(d).unwrap();
-        let mut cm = cm.down_map_take_cursor(md).unwrap();
+        let mut c2 = c.split_below_with(d).unwrap();
+        let mut cm = cm.split_below_with(md).unwrap();
         assert_eq!(&c2.get().target, "bar");
         assert_eq!(&cm.get().target, "bar");
         {
-            let c3 = c2.down_map_take_cursor(d).unwrap();
-            let cm = cm.down_map_take_cursor(md).unwrap();
+            let c3 = c2.split_below_with(d).unwrap();
+            let cm = cm.split_below_with(md).unwrap();
             assert_eq!(&c3.get().target, "fuzz");
             assert_eq!(&cm.get().target, "fuzz");
         }
         assert_eq!(&c2.get().target, "bar");
         assert_eq!(&cm.get().target, "bar");
-        assert!(c2.down_map_take_cursor(d).is_none());
-        assert!(cm.down_map_take_cursor(md).is_none());
+        assert!(c2.split_below_with(d).is_none());
+        assert!(cm.split_below_with(md).is_none());
     }
     assert_eq!(&c.get().target, "foo");
     assert_eq!(&cm.get().target, "foo");
-    assert!(c.down_map_take_cursor(d).is_none());
-    assert!(cm.down_map_take_cursor(md).is_none());
+    assert!(c.split_below_with(d).is_none());
+    assert!(cm.split_below_with(md).is_none());
 }

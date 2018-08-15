@@ -29,7 +29,7 @@ impl<'n: 'f, 'f, N: 'n> TreeCursor<'n, 'f, N> {
         self.stack.last_mut().unwrap()
     }
 
-    fn down_map_ptr<F>(&mut self, f: F) -> Option<*const N>
+    fn down_ptr_with<F>(&mut self, f: F) -> Option<*const N>
     where
         F: Fn(&'n N, usize) -> Option<&'n N>,
     {
@@ -45,28 +45,28 @@ impl<'n: 'f, 'f, N: 'n> TreeCursor<'n, 'f, N> {
     /// counter. If `f` returns a node, it's set as the active node, the old
     /// active node's "next child" counter is incremented, and this method
     /// returns true. Otherwise, this method returns false.
-    pub fn down_map<F>(&mut self, f: F) -> bool
+    pub fn down_with<F>(&mut self, f: F) -> bool
     where
         F: Fn(&'n N, usize) -> Option<&'n N>,
     {
-        let maybe_new_ptr = self.down_map_ptr(f);
+        let maybe_new_ptr = self.down_ptr_with(f);
         if let &Some(new_ptr) = &maybe_new_ptr {
             self.stack.push((new_ptr, 0));
         }
         maybe_new_ptr.is_some()
     }
 
-    /// Like [`down_take_cursor`], except that it takes a closure like
-    /// [`down_map`].
+    /// Like [`split_below`], except that it takes a closure like
+    /// [`down_with`].
     ///
-    /// [`down_take_cursor`]: TreeCursor::down_take_cursor
-    /// [`down_map`]: TreeCursor::down_map
-    pub fn down_map_take_cursor<'s, F>(&'s mut self, f: F)
+    /// [`split_below`]: TreeCursor::split_below
+    /// [`down_with`]: TreeCursor::down_with
+    pub fn split_below_with<'s, F>(&'s mut self, f: F)
         -> Option<TreeCursor<'n, 's, N>>
     where
         F: Fn(&'n N, usize) -> Option<&'n N>,
     {
-        let new_ptr = self.down_map_ptr(f)?;
+        let new_ptr = self.down_ptr_with(f)?;
         Some(Self {
             root: PhantomData,
             frozen: PhantomData,
@@ -97,7 +97,7 @@ impl<'n: 'f, 'f, N: 'n> TreeCursor<'n, 'f, N> {
     /// Takes the active node from this `TreeCursor` and returns a new
     /// `TreeCursor` at that position. `self` is frozen until the new cursor
     /// goes out of scope.
-    pub fn take_cursor<'s>(&'s mut self) -> Option<TreeCursor<'n, 's, N>> {
+    pub fn split_above<'s>(&'s mut self) -> Option<TreeCursor<'n, 's, N>> {
         if self.stack.len() == 1 {
             None
         } else {
@@ -144,7 +144,7 @@ impl<'n: 'f, 'f, N: 'n + Down> TreeCursor<'n, 'f, N> {
     /// frozen until the new cursor goes out of scope.
     ///
     /// [`down`]: TreeCursor::down
-    pub fn down_take_cursor<'s>(&'s mut self) -> Option<TreeCursor<'n, 's, N>> {
+    pub fn split_below<'s>(&'s mut self) -> Option<TreeCursor<'n, 's, N>> {
         let new_ptr = self.down_ptr()?;
         Some(Self {
             root: PhantomData,
@@ -195,7 +195,7 @@ impl<'n: 'f, 'f, N: 'n> TreeCursorMut<'n, 'f, N> {
         self.stack.last_mut().unwrap()
     }
 
-    fn down_map_ptr<F>(&mut self, f: F) -> Option<*mut N>
+    fn down_ptr_with<F>(&mut self, f: F) -> Option<*mut N>
     where
         F: Fn(&'n mut N, usize) -> Option<&'n mut N>,
     {
@@ -210,28 +210,28 @@ impl<'n: 'f, 'f, N: 'n> TreeCursorMut<'n, 'f, N> {
     /// counter. If `f` returns a node, it's set as the active node, the old
     /// active node's "next child" counter is incremented, and this method
     /// returns true. Otherwise, this method returns false.
-    pub fn down_map<F>(&mut self, f: F) -> bool
+    pub fn down_with<F>(&mut self, f: F) -> bool
     where
         F: Fn(&'n mut N, usize) -> Option<&'n mut N>,
     {
-        let maybe_new_ptr = self.down_map_ptr(f);
+        let maybe_new_ptr = self.down_ptr_with(f);
         if let &Some(new_ptr) = &maybe_new_ptr {
             self.stack.push((new_ptr, 0));
         }
         maybe_new_ptr.is_some()
     }
 
-    /// Like [`down_take_cursor`], except that it takes a closure like
-    /// [`down_map`].
+    /// Like [`split_below`], except that it takes a closure like
+    /// [`down_with`].
     ///
-    /// [`down_take_cursor`]: TreeCursorMut::down_take_cursor
-    /// [`down_map`]: TreeCursorMut::down_map
-    pub fn down_map_take_cursor<'s, F>(&'s mut self, f: F)
+    /// [`split_below`]: TreeCursorMut::split_below_with
+    /// [`down_with`]: TreeCursorMut::down_with
+    pub fn split_below_with<'s, F>(&'s mut self, f: F)
         -> Option<TreeCursorMut<'n, 's, N>>
     where
         F: Fn(&'n mut N, usize) -> Option<&'n mut N>,
     {
-        let new_ptr = self.down_map_ptr(f)?;
+        let new_ptr = self.down_ptr_with(f)?;
         Some(Self {
             root: PhantomData,
             frozen: PhantomData,
@@ -262,7 +262,7 @@ impl<'n: 'f, 'f, N: 'n> TreeCursorMut<'n, 'f, N> {
     /// Takes the active node from this `TreeCursorMut` and returns a new
     /// `TreeCursorMut` at that position. `self` is frozen until the new cursor
     /// goes out of scope.
-    pub fn take_cursor<'s>(&'s mut self) -> Option<TreeCursorMut<'n, 's, N>> {
+    pub fn split_above<'s>(&'s mut self) -> Option<TreeCursorMut<'n, 's, N>> {
         if self.stack.len() == 1 {
             None
         } else {
@@ -374,7 +374,7 @@ impl<'n: 'f, 'f, N: 'n + DownMut> TreeCursorMut<'n, 'f, N> {
     /// frozen until the new cursor goes out of scope.
     ///
     /// [`down`]: TreeCursorMut::down
-    pub fn down_take_cursor<'s>(
+    pub fn split_below<'s>(
         &'s mut self
     ) -> Option<TreeCursorMut<'n, 's, N>> {
         let new_ptr = self.down_ptr()?;
