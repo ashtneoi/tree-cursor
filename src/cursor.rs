@@ -153,6 +153,14 @@ impl<'n, N: 'n> TreeCursorMut<'n, 'n, N> {
     }
 }
 
+impl<'n: 'f, 'f, N: 'n + Clone> TreeCursorMut<'n, 'f, N> {
+    pub fn clone_root(&self) -> N {
+        let (root, _) = self.stack[0];
+        let root = unsafe { root.as_ref().unwrap() };
+        root.clone()
+    }
+}
+
 impl<'n: 'f, 'f, N: 'n> TreeCursorMut<'n, 'f, N> {
     fn top(&self) -> &(*mut N, usize) {
         self.stack.last().unwrap()
